@@ -11,6 +11,7 @@ from copy import deepcopy
 from datetime import datetime, timedelta
 import os
 import sys
+import re
 
 if getattr(sys, "frozen", False):
     # When packed as an EXE, use the executable's folder for output files,
@@ -30,27 +31,23 @@ def get_currency_prefix(currency=None):
 
 
 def smart_linebreak_specs(text):
-    """
-    Add line breaks before specification keywords to format multi-line specs.
-    Keywords are processed longest-first to avoid partial matches (e.g., "Front Axle" before "Front").
-    
-    Args:
-        text: Raw specification text from user input
-    
-    Returns:
-        Formatted text with line breaks before keywords
-    """
-    # Keywords ordered by length (longest first) to handle overlapping patterns
     keywords = [
-        "Front Axle",
-        "Steering:", "Gearbox:", "Engine:", "Cabin:", "Loading", "Towing",
+        "Front Axle", "Inner dimensions", "Column", "Loading", "Towing",
+        "Model:CPCD35-XC5K2", "Capacity 3500kg@500mm load center", 
         "Without", "Overall", "Tires:", "Tire:", "Locks:", "Fifth",
-        "Cargo", "Color:", "Load:", "Fuel", "Rear Axle", "With"
+        "2 stage 3meter standard lift mast", "3piece valve with side shift",
+        "1070mm fork", "solid tires", "comfortable seat", "other all standard",
+        "Steering:", "Gearbox:", "Engine:", "Cabin:", "XINCHAI C490engine",
+        "Automatic transimission",
+        "Cargo", "Color:", "Load:", "Fuel", "Rear Axle", "With", "Volume of the compartment", 
+        "Axle: FUWA",
+        "Traction pin", "Brake chamber"
     ]
     
+        
     for keyword in keywords:
         # Replace space + keyword with newline + keyword
-        text = text.replace(" " + keyword, "\n" + keyword)
+        text = re.sub(r'(?<=[^\n])' + re.escape(keyword), '\n' + keyword, text)
     
     # Clean up and trim
     text = text.strip()
