@@ -15,11 +15,11 @@ import re
 from PIL import Image, ImageTk
 
 if getattr(sys, "frozen", False):
-    # When packed as an EXE, use the executable's folder for output files,
-    # instead of the temporary runtime extraction location.
-    BASE_DIR = os.path.dirname(os.path.abspath(sys.argv[0]))
+    BASE_DIR = os.path.dirname(os.path.abspath(sys.argv[0]))  # for output files
+    BUNDLE_DIR = sys._MEIPASS                                  # for bundled assets
 else:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    BUNDLE_DIR = BASE_DIR
 
 
 def format_currency(value):
@@ -56,7 +56,8 @@ def smart_linebreak_specs(text):
         "Container lock:", "Suspension：", "King Pin :",
         "Axle :", "Landing gear：", "Lock set:", "Tool Box :",
         "Lamp :", "Engine :", "Axle:13000kg×3 FUWA", "Kingpin;",
-        "Brake Chamber:"
+        "Brake Chamber:", "Transmission:", "Capacity 10000kg@600mm load center",
+        "ISUZU 6BG1 engine，", "1520mm fork，", "Steering Box:"
 
     ]
     
@@ -165,18 +166,11 @@ def set_spec_cell(cell, model, spec_text):
 
 def get_template_path():
     if getattr(sys, "frozen", False):
-        base_dir = getattr(sys, "_MEIPASS", BASE_DIR)
+        base_dir = BUNDLE_DIR
     else:
         base_dir = BASE_DIR
 
-    candidates = [
-        os.path.join(base_dir, "quotation_template.docx"),
-        os.path.join(base_dir, "quotation_template.docx.docx"),
-    ]
-    for path in candidates:
-        if os.path.exists(path):
-            return path
-    raise FileNotFoundError("quotation_template.docx")
+    return os.path.join(base_dir, "quotation_template.docx")
 
 
 def find_main_table(doc):
@@ -245,6 +239,8 @@ def get_income_advance_base(model_text, currency):
     if "6X4" in model_text:
         return 350 if currency == "USD" else 1300000
     if "8X4" in model_text:
+        return 400 if currency == "USD" else 1500000
+    if "8×4" in model_text:
         return 400 if currency == "USD" else 1500000
     if "RECTANGLE DUMP TIPPING TRAILER WITH THREE AXLES" in model_text:
         return 400 if currency == "USD" else 1500000
@@ -450,7 +446,8 @@ brand_box.grid(row=8, column=1, padx=(0,5), sticky="w")
 
 info_frame.grid_columnconfigure(3, weight=1, minsize=300)
 
-rindex_image_path = os.path.join(BASE_DIR, "rindex.png")
+rindex_image_path = os.path.join(BUNDLE_DIR, "rindex.png")
+
 original_rindex_image = None
 if os.path.exists(rindex_image_path):
     if Image is not None:
